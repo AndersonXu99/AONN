@@ -10,9 +10,11 @@ import time
 start_time = time.time()
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
-### OANN                                                                                                             ###
-### Authoer: Anderson Xu                                                                                             ###
+### AONN                                                                                                             ###
+### Author: Anderson Xu                                                                                              ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
+
+
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### User Input Section                                                                                               ###
@@ -20,9 +22,11 @@ start_time = time.time()
 # Please enter the file path to the MAIN folder and also name the file that you would like the results to output to
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
-data_folder_path = "C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz"
-output_file_name = "Insert here - test again"  # Keep the slash before your title
-csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\2X2 Mod Depth to Power updated.csv'
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 12 2024\Test - Copy (2)"
+output_file_name = "Insert here1"
+
+# path to the csv that maps the 0-20 values to actual powers of the beam
+csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\test.csv'
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 
@@ -40,12 +44,10 @@ def calculate_EIT(image1, roi1):
 def calculate_background(image2, roi2):
     # Create the first ROI using numpy slicing
     roi2_gray = image2[roi2[0]:roi2[1], roi2[2]:roi2[3]]
-
     # Calculate the sum of grayscale intensity within the first ROI
     intensity_background = np.sum(roi2_gray)
 
     return intensity_background
-
 
 def draw_rois_on_image(image, rois, output_folder, file_name):
     # Create a copy of the image to avoid modifying the original
@@ -55,6 +57,7 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
     for roi in rois:
         cv2.rectangle(image_with_rois, (roi[2], roi[0]), (roi[3], roi[1]), (0, 255, 0), 1)  # Green rectangle
 
+    print("helloooo")
     # Save the image with the drawn ROIs
     output_path = os.path.join(output_folder, f'{file_name}.png')
     cv2.imwrite(output_path, image_with_rois)
@@ -62,9 +65,26 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
 # Function to load an image given its file path
 def load_image(image_path):
     return cv2.imread(image_path, cv2.IMREAD_COLOR)
+
+def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
+    # for when power is 0, buffer the name to be 0.00
+    if desired_name == '0':
+        desired_name = '0.00'
+    # Construct full paths for the original and desired files
+    BG_original_path = os.path.join(BG_folder_path, original_name + '.TIFF')
+    BG_desired_path = os.path.join(BG_folder_path, desired_name + '.TIFF')
+
+    # Construct full paths for the original and desired files
+    EIT_original_path = os.path.join(EIT_folder_path, original_name + '.TIFF')
+    EIT_desired_path = os.path.join(EIT_folder_path, desired_name + '.TIFF')
+
+    # Rename the file
+    try:
+        os.rename(BG_original_path, BG_desired_path)
+        os.rename(EIT_original_path, EIT_desired_path)
+    except FileNotFoundError:
+        print(f'File {BG_original_path} not found.')
 ### ---------------------------------------------------------------------------------------------------------------- ###
-
-
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### File Handling and Image Loading                                                                                  ###
@@ -72,16 +92,32 @@ def load_image(image_path):
 # Defining all file paths needed
 EIT_main_folder = os.path.join(data_folder_path, 'EIT')  # Directory for the first set of images
 BG_main_folder = os.path.join(data_folder_path, 'BG')  # Directory for the second set of images
-image_dir_roi = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
-os.makedirs(os.path.join(data_folder_path, output_file_name), exist_ok=True) # Create a main output folder
+roi_image_dir = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
+main_output_folder = os.path.join(data_folder_path, output_file_name)
+os.makedirs(main_output_folder, exist_ok=True)  # Create a main output folder
+
+# Read CSV file
+with open(csv_file_path, 'r') as csv_file:
+    csv_reader = csv.reader(csv_file)
+    next(csv_reader)  # Skip header row
+
+    # Execute renaming process concurrently
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        for row in csv_reader:
+            executor.submit(rename_files, row[0], row[2], BG_main_folder, EIT_main_folder)
+print('Renaming process complete.')
+end_time = time.time()
 
 # Get the list of files in the image directories
 image_files_1 = os.listdir(EIT_main_folder)
 image_files_2 = os.listdir(BG_main_folder)
 
 # Sort the file lists to ensure consistent pairing
-image_files_1 = natsort.natsorted(image_files_1)
-image_files_2 = natsort.natsorted(image_files_2)
+image_files_1 = sorted(image_files_1)
+image_files_2 = sorted(image_files_2)
+
+# reading the reference ROI image
+ROI_image = cv2.imread(roi_image_dir, cv2.IMREAD_COLOR)
 
 # Combine directory paths with filenames in parallel
 with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -97,6 +133,10 @@ print("Images Loaded")
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 
+
+### ---------------------------------------------------------------------------------------------------------------- ###
+### Initialization                                                                                                   ###
+### ---------------------------------------------------------------------------------------------------------------- ###
 # Define the ROI coordinates (top, bottom, left, right) for 20 ROIs
 roi_coords = [(234, 260, 359, 391), (254, 280, 724, 753), (277, 306, 1109, 1132), (310, 337, 1472, 1499),
               (347, 369, 1839, 1869),
@@ -109,25 +149,23 @@ roi_coords = [(234, 260, 359, 391), (254, 280, 724, 753), (277, 306, 1109, 1132)
               (1654, 1676, 229, 258), (1681, 1703, 598, 627), (1715, 1736, 975, 1010), (1741, 1766, 1349, 1382),
               (1774, 1798, 1726, 1759)]  # Example coordinates for 25 ROIs
 
-
-
-
-
-# Sort the file lists to ensure consistent pairing
-# image_files_1.sort()
-# image_files_2.sort()
-
 # Initialize lists to store EIT and Background values for each ROI
 EIT_values = []
 intensity_difference_values = []
 
-imageroi = cv2.imread(image_dir_roi, cv2.IMREAD_COLOR)
+# the beam intensities
+file_names_beam = []
+### ---------------------------------------------------------------------------------------------------------------- ###
 
+
+
+### ---------------------------------------------------------------------------------------------------------------- ###
+### Main Function                                                                                                    ###
+### ---------------------------------------------------------------------------------------------------------------- ###
 # mark roi image
-draw_rois_on_image(imageroi, roi_coords, output_file_name, f'ROI_All')
+draw_rois_on_image(ROI_image, roi_coords, main_output_folder, f'ROI_All')
 
 # process to find the array of power of each beam
-file_names_beam = []
 for file1, file2 in zip(natsort.natsorted(image_files_1), natsort.natsorted(image_files_2)):
     # Extract the image numbers from the filenames
     image_num1 = float(os.path.splitext(file1)[0])
@@ -207,6 +245,7 @@ for beam_index, (roi1, roi2) in enumerate(zip(roi_coords, roi_coords)):
     plt.close()
     # plt.show()
 
+# Plotting the overall plot
 fig, axs = plt.subplots(5, 5, figsize=(12, 8))  # Create a 5x5 grid of subplots
 
 # Iterate through each beam and plot its intensity difference curve in the corresponding subplot
