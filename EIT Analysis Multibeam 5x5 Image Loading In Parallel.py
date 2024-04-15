@@ -22,11 +22,12 @@ start_time = time.time()
 # Please enter the file path to the MAIN folder and also name the file that you would like the results to output to
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 12 2024\Test - Copy (2)"
-output_file_name = "Insert here1"
+# Important: Keep the r in front of the quotation mark
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 15 2024\5X5 Trans5 50mm cell 138C Onres 3037MHz"
+output_file_name = "Result"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
-csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\test.csv'
+csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\5X5 Mod Depth to Power updated - Copy.csv'
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 
@@ -38,14 +39,14 @@ def calculate_EIT(image1, roi1):
     # Create the first ROI using numpy slicing
     roi1_gray = image1[roi1[0]:roi1[1], roi1[2]:roi1[3]]
     # Calculate the sum of grayscale intensity within the first ROI
-    intensity_EIT = np.sum(roi1_gray)
+    intensity_EIT = np.sum(roi1_gray, dtype=float)
     return intensity_EIT
 
 def calculate_background(image2, roi2):
     # Create the first ROI using numpy slicing
     roi2_gray = image2[roi2[0]:roi2[1], roi2[2]:roi2[3]]
     # Calculate the sum of grayscale intensity within the first ROI
-    intensity_background = np.sum(roi2_gray)
+    intensity_background = np.sum(roi2_gray, dtype=float)
 
     return intensity_background
 
@@ -91,7 +92,7 @@ def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
 # Defining all file paths needed
 EIT_main_folder = os.path.join(data_folder_path, 'EIT')  # Directory for the first set of images
 BG_main_folder = os.path.join(data_folder_path, 'BG')  # Directory for the second set of images
-roi_image_dir = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
+roi_image_dir = os.path.join(data_folder_path, 'ROI.tif')  # ROI image path
 main_output_folder = os.path.join(data_folder_path, output_file_name)
 os.makedirs(main_output_folder, exist_ok=True)  # Create a main output folder
 
@@ -136,16 +137,16 @@ print("Images Loaded")
 ### Initialization                                                                                                   ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
 # Define the ROI coordinates (top, bottom, left, right) for 20 ROIs
-roi_coords = [(234, 260, 359, 391), (254, 280, 724, 753), (277, 306, 1109, 1132), (310, 337, 1472, 1499),
-              (347, 369, 1839, 1869),
-              (587, 610, 321, 344), (600, 631, 702, 727), (630, 650, 1074, 1094), (661, 692, 1430, 1467),
-              (698, 726, 1809, 1838),
-              (931, 995, 299, 327), (960, 989, 660, 694), (980, 1015, 1020, 1051), (1020, 1046, 1406, 1437),
-              (1056, 1081, 1773, 1818),
-              (1286, 1310, 260, 288), (1318, 1341, 634, 663), (1340, 1367, 1000, 1035), (1380, 1405, 1369, 1422),
-              (1410, 1435, 1753, 1780),
-              (1654, 1676, 229, 258), (1681, 1703, 598, 627), (1715, 1736, 975, 1010), (1741, 1766, 1349, 1382),
-              (1774, 1798, 1726, 1759)]  # Example coordinates for 25 ROIs
+roi_coords = [(239, 272, 318, 348), (267, 295, 680, 716), (282, 315, 1068, 1100), (334, 365, 1440, 1476),
+              (375, 409, 1813, 1853),
+              (595, 624, 272, 306), (614, 648, 648, 679), (662, 688, 1025, 1056), (694, 725, 1392, 1433),
+              (730, 757, 1779, 1818),
+              (941, 970, 240, 281), (968, 1004, 616, 649), (1024, 1069, 988, 1032), (1047, 1079, 1365, 1399),
+              (1088, 1120, 1748, 1778),
+              (1300, 1326, 201, 238), (1331, 1364, 578, 615), (1371, 1410, 965, 1008), (1398, 1425, 1339, 1372),
+              (1445, 1477, 1711, 1748),
+              (1651, 1682, 172, 206), (1689, 1725, 549, 585), (1735, 1763, 924, 964), (1775, 1803, 1317, 1356),
+              (1818, 1845, 1686, 1720)]  # Example coordinates for 25 ROIs
 
 # Initialize lists to store EIT and Background values for each ROI
 EIT_values = []
