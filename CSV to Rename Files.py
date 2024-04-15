@@ -1,19 +1,14 @@
 import csv
 import os
+import time
 # user input master file path
 # csv_file_path = input('Enter the path to the CSV file: ')
-csv_file_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 11 2024\\2X2 Mod Depth to Power updated.csv'
-master_folder_path = r''.join(input('Enter the path to the master folder: '))
 
+csv_file_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 11 2024\\5X5 Mod Depth to Power updated.csv'
+BG_folder_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 12 2024\\Test - Copy (2)\\BG'
+EIT_folder_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 12 2024\\Test - Copy (2)\\EIT'
 
-csv_file_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 11 2024\\2X2 Mod Depth to Power updated.csv'
-BG_folder_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 11 2024\\138C\\2X2 Trans5 50mm cell 138C Onres 3036MHz\\BG'
-EIT_folder_path = 'C:\\Users\\zxq220007\\Box\\Quantum Optics Lab\\TeTON OANN Testbed\\Data 2024\\Apr 11 2024\\138C\\2X2 Trans5 50mm cell 138C Onres 3036MHz\\EIT'
-
-
-# this is a test
-# Hello world
-
+starting_time = time.time()
 
 #Read CSV file
 with open(csv_file_path, 'r') as csv_file:
@@ -39,5 +34,8 @@ with open(csv_file_path, 'r') as csv_file:
             os.rename(EIT_original_path, EIT_desired_path)
         except FileNotFoundError:
             print(f'File {BG_original_path} not found.')
+
+ending_time = time.time()
+print(f'Total time: {ending_time - starting_time}')
 
 print('Renaming process complete.')

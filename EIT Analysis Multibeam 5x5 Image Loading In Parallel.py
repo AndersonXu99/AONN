@@ -57,7 +57,6 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
     for roi in rois:
         cv2.rectangle(image_with_rois, (roi[2], roi[0]), (roi[3], roi[1]), (0, 255, 0), 1)  # Green rectangle
 
-    print("helloooo")
     # Save the image with the drawn ROIs
     output_path = os.path.join(output_folder, f'{file_name}.png')
     cv2.imwrite(output_path, image_with_rois)
@@ -96,12 +95,11 @@ roi_image_dir = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
 main_output_folder = os.path.join(data_folder_path, output_file_name)
 os.makedirs(main_output_folder, exist_ok=True)  # Create a main output folder
 
-# Read CSV file
+# Renaming the files
 with open(csv_file_path, 'r') as csv_file:
     csv_reader = csv.reader(csv_file)
     next(csv_reader)  # Skip header row
 
-    # Execute renaming process concurrently
     with concurrent.futures.ThreadPoolExecutor() as executor:
         for row in csv_reader:
             executor.submit(rename_files, row[0], row[2], BG_main_folder, EIT_main_folder)
