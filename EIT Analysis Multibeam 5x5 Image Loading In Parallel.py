@@ -23,8 +23,8 @@ start_time = time.time()
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
 # Important: Keep the r in front of the quotation mark
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 15 2024\5X5 Trans5 50mm cell 138C Onres 3037MHz"
-output_file_name = "Result"
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 15 2024\50 mm cell with additional foil\130 C"
+output_file_name = "Results 1"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
 csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\5X5 Mod Depth to Power updated - Copy.csv'
@@ -64,7 +64,7 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
 
 # Function to load an image given its file path
 def load_image(image_path):
-    return cv2.imread(image_path, cv2.IMREAD_COLOR)
+    return cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
 def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
     # for when power is 0, buffer the name to be 0.00
@@ -92,7 +92,7 @@ def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
 # Defining all file paths needed
 EIT_main_folder = os.path.join(data_folder_path, 'EIT')  # Directory for the first set of images
 BG_main_folder = os.path.join(data_folder_path, 'BG')  # Directory for the second set of images
-roi_image_dir = os.path.join(data_folder_path, 'ROI.tif')  # ROI image path
+roi_image_dir = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
 main_output_folder = os.path.join(data_folder_path, output_file_name)
 os.makedirs(main_output_folder, exist_ok=True)  # Create a main output folder
 
@@ -116,7 +116,7 @@ image_files_1 = sorted(image_files_1)
 image_files_2 = sorted(image_files_2)
 
 # reading the reference ROI image
-ROI_image = cv2.imread(roi_image_dir, cv2.IMREAD_COLOR)
+ROI_image = cv2.imread(roi_image_dir, cv2.IMREAD_UNCHANGED)
 
 # Combine directory paths with filenames in parallel
 with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -137,16 +137,11 @@ print("Images Loaded")
 ### Initialization                                                                                                   ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
 # Define the ROI coordinates (top, bottom, left, right) for 20 ROIs
-roi_coords = [(239, 272, 318, 348), (267, 295, 680, 716), (282, 315, 1068, 1100), (334, 365, 1440, 1476),
-              (375, 409, 1813, 1853),
-              (595, 624, 272, 306), (614, 648, 648, 679), (662, 688, 1025, 1056), (694, 725, 1392, 1433),
-              (730, 757, 1779, 1818),
-              (941, 970, 240, 281), (968, 1004, 616, 649), (1024, 1069, 988, 1032), (1047, 1079, 1365, 1399),
-              (1088, 1120, 1748, 1778),
-              (1300, 1326, 201, 238), (1331, 1364, 578, 615), (1371, 1410, 965, 1008), (1398, 1425, 1339, 1372),
-              (1445, 1477, 1711, 1748),
-              (1651, 1682, 172, 206), (1689, 1725, 549, 585), (1735, 1763, 924, 964), (1775, 1803, 1317, 1356),
-              (1818, 1845, 1686, 1720)]  # Example coordinates for 25 ROIs
+roi_coords = [(183, 227, 375, 410), (212, 249, 745, 773), (243, 286, 1117, 1153), (284, 314, 1501, 1532),(324, 356, 1866, 1895),
+              (539, 578, 343, 372), (564, 602, 712, 747), (605, 633, 1088, 1117), (627, 670, 1455, 1489),(666, 703, 1836, 1865),
+              (883, 914, 296, 335), (913, 948, 675, 717), (970, 1015, 1045, 1081), (988, 1024, 1418, 1456),(1016, 1051, 1794, 1830),
+              (1241, 1271, 264, 296), (1272, 1312, 637, 680), (1303, 1340, 1001, 1051), (1331, 1371, 1384, 1418),(1368, 1401, 1759, 1797),
+              (1593, 1628, 227, 260), (1624, 1664, 613, 646), (1659, 1698, 966, 1018), (1698, 1729, 1358, 1399),(1728, 1762, 1729, 1760)]  # Example coordinates for 25 ROIs  # Example coordinates for 25 ROIs
 
 # Initialize lists to store EIT and Background values for each ROI
 EIT_values = []
