@@ -23,11 +23,11 @@ start_time = time.time()
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
 # Important: Keep the r in front of the quotation mark
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 15 2024\50 mm cell with additional foil\130 C"
-output_file_name = "Results 1"
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans5 50mm cell 120C 290MHz 3037MHz"
+output_file_name = "Results"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
-csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\5X5 Mod Depth to Power updated - Copy.csv'
+csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Mod Depth to Power updated.csv'
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 
@@ -35,16 +35,29 @@ csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\D
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### Function Definitions                                                                                             ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
+def create_circle_mask(shape, center, radius):
+    """Create a boolean mask representing a circle."""
+    rows, cols = np.ogrid[:shape[0], :shape[1]]
+    circle_mask = (rows - center[0])**2 + (cols - center[1])**2 <= radius**2
+    return circle_mask
+
+def slice_circle(image, center, radius):
+    """Slice a circular region from an image."""
+    mask = create_circle_mask(image.shape[:2], center, radius)
+    sliced_circle = image.copy()
+    sliced_circle[~mask] = 0  # Set pixels outside the circle to 0
+    return sliced_circle
+
 def calculate_EIT(image1, roi1):
     # Create the first ROI using numpy slicing
-    roi1_gray = image1[roi1[0]:roi1[1], roi1[2]:roi1[3]]
+    roi1_gray = slice_circle(image1, (roi1[0], roi1[1]), roi1[2])
     # Calculate the sum of grayscale intensity within the first ROI
     intensity_EIT = np.sum(roi1_gray, dtype=float)
     return intensity_EIT
 
 def calculate_background(image2, roi2):
     # Create the first ROI using numpy slicing
-    roi2_gray = image2[roi2[0]:roi2[1], roi2[2]:roi2[3]]
+    roi2_gray = slice_circle(image2, (roi2[0], roi2[1]), roi2[2])
     # Calculate the sum of grayscale intensity within the first ROI
     intensity_background = np.sum(roi2_gray, dtype=float)
 
@@ -56,7 +69,7 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
 
     # Draw each ROI rectangle on the image
     for roi in rois:
-        cv2.rectangle(image_with_rois, (roi[2], roi[0]), (roi[3], roi[1]), (0, 255, 0), 1)  # Green rectangle
+        cv2.circle(image_with_rois, (roi[0], roi[1]), roi[2], (0, 255, 0), 1)  # Green circle
 
     # Save the image with the drawn ROIs
     output_path = os.path.join(output_folder, f'{file_name}.png')
@@ -84,6 +97,20 @@ def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
         os.rename(EIT_original_path, EIT_desired_path)
     except FileNotFoundError:
         print(f'File {BG_original_path} not found.')
+
+def read_circle_data(filename):
+    circle_data = []
+    with open(filename, 'r') as file:
+        csv_reader = csv.reader(file)
+        next(csv_reader)  # Skip the header row if it exists
+        for row in csv_reader:
+            # Extract numerical values and convert them to integers
+            center_x = int(row[0])
+            center_y = int(row[1])
+            radius = int(row[2])
+            circle_data.append([center_x, center_y, radius])
+
+    return circle_data
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
@@ -92,9 +119,12 @@ def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
 # Defining all file paths needed
 EIT_main_folder = os.path.join(data_folder_path, 'EIT')  # Directory for the first set of images
 BG_main_folder = os.path.join(data_folder_path, 'BG')  # Directory for the second set of images
-roi_image_dir = os.path.join(data_folder_path, 'ROI.tiff')  # ROI image path
+roi_image_dir = os.path.join(data_folder_path, 'ROI.tif')  # ROI image path
 main_output_folder = os.path.join(data_folder_path, output_file_name)
 os.makedirs(main_output_folder, exist_ok=True)  # Create a main output folder
+
+# reading the reference ROI image
+ROI_image = cv2.imread(roi_image_dir, cv2.IMREAD_COLOR)
 
 # Renaming the files
 with open(csv_file_path, 'r') as csv_file:
@@ -115,9 +145,6 @@ image_files_2 = os.listdir(BG_main_folder)
 image_files_1 = sorted(image_files_1)
 image_files_2 = sorted(image_files_2)
 
-# reading the reference ROI image
-ROI_image = cv2.imread(roi_image_dir, cv2.IMREAD_UNCHANGED)
-
 # Combine directory paths with filenames in parallel
 with concurrent.futures.ThreadPoolExecutor() as executor:
     image_paths_1 = list(executor.map(lambda filename: os.path.join(EIT_main_folder, filename), image_files_1))
@@ -137,11 +164,14 @@ print("Images Loaded")
 ### Initialization                                                                                                   ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
 # Define the ROI coordinates (top, bottom, left, right) for 20 ROIs
-roi_coords = [(183, 227, 375, 410), (212, 249, 745, 773), (243, 286, 1117, 1153), (284, 314, 1501, 1532),(324, 356, 1866, 1895),
-              (539, 578, 343, 372), (564, 602, 712, 747), (605, 633, 1088, 1117), (627, 670, 1455, 1489),(666, 703, 1836, 1865),
-              (883, 914, 296, 335), (913, 948, 675, 717), (970, 1015, 1045, 1081), (988, 1024, 1418, 1456),(1016, 1051, 1794, 1830),
-              (1241, 1271, 264, 296), (1272, 1312, 637, 680), (1303, 1340, 1001, 1051), (1331, 1371, 1384, 1418),(1368, 1401, 1759, 1797),
-              (1593, 1628, 227, 260), (1624, 1664, 613, 646), (1659, 1698, 966, 1018), (1698, 1729, 1358, 1399),(1728, 1762, 1729, 1760)]  # Example coordinates for 25 ROIs  # Example coordinates for 25 ROIs
+#roi_coords = [(183, 227, 375, 410), (212, 249, 745, 773), (243, 286, 1117, 1153), (284, 314, 1501, 1532),(324, 356, 1866, 1895),
+              #(539, 578, 343, 372), (564, 602, 712, 747), (605, 633, 1088, 1117), (627, 670, 1455, 1489),(666, 703, 1836, 1865),
+              #(883, 914, 296, 335), (913, 948, 675, 717), (970, 1015, 1045, 1081), (988, 1024, 1418, 1456),(1016, 1051, 1794, 1830),
+              #(1241, 1271, 264, 296), (1272, 1312, 637, 680), (1303, 1340, 1001, 1051), (1331, 1371, 1384, 1418),(1368, 1401, 1759, 1797),
+              #(1593, 1628, 227, 260), (1624, 1664, 613, 646), (1659, 1698, 966, 1018), (1698, 1729, 1358, 1399),(1728, 1762, 1729, 1760)]  # Example coordinates for 25 ROIs  # Example coordinates for 25 ROIs
+
+circle_file_path = r"C:\Users\zxq220007\Desktop\Anderson\Working File\AONN\EIT\circle_info.csv"
+roi_coords = read_circle_data(circle_file_path)
 
 # Initialize lists to store EIT and Background values for each ROI
 EIT_values = []
