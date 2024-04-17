@@ -1,4 +1,5 @@
 import csv
+import os
 
 import cv2
 import numpy as np
@@ -36,7 +37,8 @@ def undo_last_circle():
         circles.pop()
 
 # Load image
-image_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans5 50mm cell 120C 290MHz 3037MHz\ROI.tif"
+master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans5 50mm cell 138C 290MHz 3037MHz"
+image_path = os.path.join(master_file_path, "ROI.tif")
 image = cv2.imread(image_path)
 if image is None:
     print("Error: Image not found.")
@@ -75,18 +77,26 @@ output_file_path = "circle_parameters.txt"
 
 def write_circle_information_to_csv(circles, output_file):
     with open(output_file, 'w', newline='') as csvfile:
-        fieldnames = ['Center_X', 'Center_Y', 'Radius']
+        fieldnames = ['Top', 'Bottom', 'Left', 'Right']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
-        for i, circle in enumerate(circles, start=1):
+        for circle in circles:
+            center_x, center_y = circle['center']
+            radius = circle['radius']
+            # Calculate the top, bottom, left, and right coordinates
+            top = center_y - radius
+            bottom = center_y + radius
+            left = center_x - radius
+            right = center_x + radius
             writer.writerow({
-                'Center_X': circle['center'][0],
-                'Center_Y': circle['center'][1],
-                'Radius': circle['radius']
+                'Top': top,
+                'Bottom': bottom,
+                'Left': left,
+                'Right': right
             })
 
-output_csv_file = "circle_info.csv"  # Output CSV file path
+output_csv_file = os.path.join(master_file_path, "circle_info.csv")  # Output CSV file path
 write_circle_information_to_csv(circles, output_csv_file)
 # Close all OpenCV windows
 cv2.destroyAllWindows()

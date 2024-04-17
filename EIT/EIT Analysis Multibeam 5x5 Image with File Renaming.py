@@ -23,8 +23,8 @@ start_time = time.time()
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
 # Important: Keep the r in front of the quotation mark
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans5 50mm cell 120C 290MHz 3037MHz"
-output_file_name = "Results"
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans5 50mm cell 130C 290MHz 3037MHz"
+output_file_name = "Results - New"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
 csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Mod Depth to Power updated.csv'
@@ -35,31 +35,21 @@ csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\D
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### Function Definitions                                                                                             ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
-def create_circle_mask(shape, center, radius):
-    """Create a boolean mask representing a circle."""
-    rows, cols = np.ogrid[:shape[0], :shape[1]]
-    circle_mask = (rows - center[0])**2 + (cols - center[1])**2 <= radius**2
-    return circle_mask
-
-def slice_circle(image, center, radius):
-    """Slice a circular region from an image."""
-    mask = create_circle_mask(image.shape[:2], center, radius)
-    sliced_circle = image.copy()
-    sliced_circle[~mask] = 0  # Set pixels outside the circle to 0
-    return sliced_circle
-
 def calculate_EIT(image1, roi1):
     # Create the first ROI using numpy slicing
-    roi1_gray = slice_circle(image1, (roi1[0], roi1[1]), roi1[2])
+    roi1_gray = image1[roi1[0]:roi1[1], roi1[2]:roi1[3]]
+
     # Calculate the sum of grayscale intensity within the first ROI
-    intensity_EIT = np.sum(roi1_gray, dtype=float)
+    intensity_EIT = np.sum(roi1_gray)
+
     return intensity_EIT
 
 def calculate_background(image2, roi2):
     # Create the first ROI using numpy slicing
-    roi2_gray = slice_circle(image2, (roi2[0], roi2[1]), roi2[2])
+    roi2_gray = image2[roi2[0]:roi2[1], roi2[2]:roi2[3]]
+
     # Calculate the sum of grayscale intensity within the first ROI
-    intensity_background = np.sum(roi2_gray, dtype=float)
+    intensity_background = np.sum(roi2_gray)
 
     return intensity_background
 
@@ -69,7 +59,7 @@ def draw_rois_on_image(image, rois, output_folder, file_name):
 
     # Draw each ROI rectangle on the image
     for roi in rois:
-        cv2.circle(image_with_rois, (roi[0], roi[1]), roi[2], (0, 255, 0), 1)  # Green circle
+        cv2.rectangle(image_with_rois, (roi[2], roi[0]), (roi[3], roi[1]), (0, 255, 0), 1)  # Green rectangle
 
     # Save the image with the drawn ROIs
     output_path = os.path.join(output_folder, f'{file_name}.png')
@@ -99,18 +89,19 @@ def rename_files(original_name, desired_name, BG_folder_path, EIT_folder_path):
         print(f'File {BG_original_path} not found.')
 
 def read_circle_data(filename):
-    circle_data = []
+    rect_coords = []
     with open(filename, 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)  # Skip the header row if it exists
         for row in csv_reader:
             # Extract numerical values and convert them to integers
-            center_x = int(row[0])
-            center_y = int(row[1])
-            radius = int(row[2])
-            circle_data.append([center_x, center_y, radius])
+            top = int(row[0])
+            bottom = int(row[1])
+            left = int(row[2])
+            right = int(row[3])
+            rect_coords.append([top, bottom, left, right])
 
-    return circle_data
+    return rect_coords
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
@@ -170,8 +161,10 @@ print("Images Loaded")
               #(1241, 1271, 264, 296), (1272, 1312, 637, 680), (1303, 1340, 1001, 1051), (1331, 1371, 1384, 1418),(1368, 1401, 1759, 1797),
               #(1593, 1628, 227, 260), (1624, 1664, 613, 646), (1659, 1698, 966, 1018), (1698, 1729, 1358, 1399),(1728, 1762, 1729, 1760)]  # Example coordinates for 25 ROIs  # Example coordinates for 25 ROIs
 
-circle_file_path = r"C:\Users\zxq220007\Desktop\Anderson\Working File\AONN\EIT\circle_info.csv"
+circle_file_path = os.path.join(data_folder_path, "circle_info.csv")
 roi_coords = read_circle_data(circle_file_path)
+
+# print(roi_coords)
 
 # Initialize lists to store EIT and Background values for each ROI
 EIT_values = []
