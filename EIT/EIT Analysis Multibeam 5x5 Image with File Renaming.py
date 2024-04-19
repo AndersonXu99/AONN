@@ -23,7 +23,7 @@ start_time = time.time()
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
 # Important: Keep the r in front of the quotation mark
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Trans7 50mm cell 130C 290MHz 3037MHz"
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 19 2024\5X5 Trans5 50mm cell 130C 290MHz 3037MHz"
 output_file_name = "Results 1"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
@@ -266,7 +266,10 @@ for beam_index, (roi1, roi2) in enumerate(zip(roi_coords, roi_coords)):
 
 # Plotting the overall plot
 fig, axs = plt.subplots(5, 5, figsize=(12, 8))  # Create a 5x5 grid of subplots
-plt.title(test_run_name)
+
+# Title the overall plot
+fig.suptitle('Intensity Difference vs Power for Each Beam', fontsize=16)
+
 # Iterate through each beam and plot its intensity difference curve in the corresponding subplot
 for beam_index in range(len(intensity_difference_values)):
     row_index = beam_index // 5  # Calculate the row index in the grid

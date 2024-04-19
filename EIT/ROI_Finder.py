@@ -10,7 +10,7 @@ import numpy as np
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 # Load image
-master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 17 2024\Take 2\5X5 Trans7 50mm cell 130C 290MHz 3037MHz"
+master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 19 2024\5X5 Trans5 50mm cell 130C 290MHz 3037MHz"
 image_path = os.path.join(master_file_path, "ROI.tif")
 image = cv2.imread(image_path)
 if image is None:
@@ -101,7 +101,7 @@ def write_circle_information_to_csv(circles, output_file):
                 'Right': right
             })
 
-output_csv_file = os.path.join(master_file_path, "circle_info 1.csv")  # Output CSV file path
+output_csv_file = os.path.join(master_file_path, "circle_info.csv")  # Output CSV file path
 write_circle_information_to_csv(circles, output_csv_file)
 # Close all OpenCV windows
 cv2.destroyAllWindows()
