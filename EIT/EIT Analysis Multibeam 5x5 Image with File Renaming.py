@@ -268,7 +268,7 @@ for beam_index, (roi1, roi2) in enumerate(zip(roi_coords, roi_coords)):
 fig, axs = plt.subplots(5, 5, figsize=(12, 8))  # Create a 5x5 grid of subplots
 
 # Title the overall plot
-fig.suptitle('Intensity Difference vs Power for Each Beam', fontsize=16)
+fig.suptitle(test_run_name, fontsize=16)
 
 # Iterate through each beam and plot its intensity difference curve in the corresponding subplot
 for beam_index in range(len(intensity_difference_values)):
