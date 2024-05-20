@@ -47,6 +47,7 @@ def load_image(image_path):
 
 # loading the images in using threadpool
 image_path = os.path.join(master_file_path, "ROI.tif")
+# load all the images used to training the final mapping matrix
 with concurrent.futures.ThreadPoolExecutor() as executor:
     image = executor.submit(load_image, image_path)
 
@@ -73,15 +74,13 @@ def generate_dataset_for_digit(digit, num_samples):
 class SimpleNN(nn.Module):
     def __init__(self):
         super(SimpleNN, self).__init__()
-        self.fc1 = nn.Linear(14, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.fc1 = nn.Linear(14, 10)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 
-# Training function
 def train_model(X_train, y_train):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = SimpleNN().to(device)
