@@ -7,10 +7,12 @@ import numpy as np
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### AONN - ROI Finder                                                                                                ###
 ### Author: Anderson Xu                                                                                              ###
+### To use the program, run the file, click and drag the cursor to indicate the ROI, press U to undo and press Q when###
+### all ROI's are selected                                                                                           ###
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 # Load image
-master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 19 2024\5X5 Trans5 50mm cell 130C 290MHz 3037MHz"
+master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 13 2024\GSW 5X4 Trans7.5 125C 290MHz 3036MHz"
 image_path = os.path.join(master_file_path, "ROI.tif")
 image = cv2.imread(image_path)
 if image is None:
