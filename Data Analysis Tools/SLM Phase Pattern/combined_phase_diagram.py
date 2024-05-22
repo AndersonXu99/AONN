@@ -16,6 +16,9 @@ master_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Test
 # open the master file path which contains all sub folders
 master_folder = os.listdir(master_folder_path)
 
+# i want to sort the master_folder variable 1, 2, 3, 4 order
+master_folder.sort()
+
 # within the master folder there are folders named from _1 to _144, create the path for each folder and read the .mat files 
 data = {}
 
@@ -70,6 +73,13 @@ for part_folder in data.keys():
         phase_data[part_folder][error_file] = data[part_folder][error_file]
         break
 
+# print out the error file names 
+# for debugging purposes
+# for part in phase_data.keys():
+#     for error_file in phase_data[part].keys():
+#         print (part, error_file)
+
+
 # parameters taken from the labview code
 Dim = np.array([12, 12])
 size_real = np.array([1920, 1080]) 
@@ -87,7 +97,7 @@ for part in phase_data.keys():
         
         x = int(Dim[0] - 1 - np.mod(part - 1, Dim[0]))
         y = int(np.floor((part - 1) / Dim[0]))  
-        print (x, y)
+        # print (x, y)
         Pattern[y*size_real[1]:(y+1)*size_real[1], x*size_real[0]:(x+1)*size_real[0]] = phase_data[part][error_file]['Pattern']
 
 # plot the combined phase diagram
