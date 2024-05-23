@@ -112,7 +112,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 intensity_array = []
 with open(output_file_path, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(["Top Left", "Bottom Right", "Intensity"])
+    writer.writerow(["Part #", "Normalized Intensity"])
 
     for rectangle in rectangles:
         top_left = rectangle['top_left']
@@ -124,5 +124,20 @@ with open(output_file_path, 'w') as f:
 
             intensity_array.append(intensity)
             
-            writer.writerow([top_left, bottom_right, intensity])
-            print(intensity)
+            # writer.writerow([top_left, bottom_right, intensity])
+            # print(intensity)
+
+        
+    # we want to normalize the intensity values to the range [0, 1] using the largest intensity value
+    max_intensity = max(intensity_array)
+    normalized_intensity = [intensity / max_intensity for intensity in intensity_array]
+
+    print(normalized_intensity)
+
+    # write the normalized intensity values to the text file
+    for i, rectangle in enumerate(rectangles):
+        top_left = rectangle['top_left']
+        bottom_right = rectangle['bottom_right']
+        intensity = normalized_intensity[i]
+
+        writer.writerow([i, intensity])
