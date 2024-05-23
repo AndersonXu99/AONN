@@ -31,7 +31,6 @@ for part_folder in master_folder:
 
         # modify the part_folder string by getting rid of the underscore and converting it to an integer
         part_folder = int(part_folder[1:])
-
         data[part_folder] = {}
 
         for file in files:
@@ -48,14 +47,15 @@ for part_folder in master_folder:
 
 # when the std is added to the mat file, we will use this to filter out the error file that has the least std for each sub folder
 # needs more work to implement
-#phase_data = {}
-#for part_folders in data.keys():
+'''
+phase_data = {}
+for part_folders in data.keys():
     # define the most outter layer of the dictionary
-#    phase_data[part_folders] = {}
-#    for error_file in data[part_folders].keys():
-#        # have a simple sorting algorithm that finds the error file with the least std
-#        if 'error' in error_file:
-
+    phase_data[part_folders] = {}
+    for error_file in data[part_folders].keys():
+        # have a simple sorting algorithm that finds the error file with the least std
+        if 'error' in error_file:
+'''
 
 # assuming that we have picked out the error file with the least std for each sub folder
 # we will use the pattern field from each error file to create the combined phase diagram
@@ -79,15 +79,13 @@ for part_folder in data.keys():
 #     for error_file in phase_data[part].keys():
 #         print (part, error_file)
 
-
-# parameters taken from the labview code
+# 12 x 12 grid
 Dim = np.array([12, 12])
 size_real = np.array([1920, 1080]) 
-
 size_real = size_real / Dim 
+
 # make sure size_real is an integer
 size_real = size_real.astype(int)
-
 Pattern = np.zeros((1080, 1920), dtype=np.float64)
 
 # now loop through the phase_data dictionary and extract the Pattern field from each error file
