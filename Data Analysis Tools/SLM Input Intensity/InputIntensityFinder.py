@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import csv
+import os
 
 ### ---------------------------------------------------------------------------------------------------------------- ###
 ### AONN - Input Intensity Finder                                                                                    ###
@@ -8,7 +9,11 @@ import csv
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 # Loading the image
-image_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 22 2024\Input intensity\Input Intensity.png"
+file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 22 2024\Input intensity"
+image_name = r"Input Intensity.png"
+
+
+image_path = os.path.join(file_path, image_name)
 image = cv2.imread(image_path)
 if image is None:
     print("Error: Image not found.")
@@ -93,7 +98,10 @@ while True:
     elif key == ord('u'):
         undo_last_rectangle()
 
-output_file_path = "input_intensity_boxes.txt"
+output_file_path = os.path.join(file_path, "input_intensity_boxes.txt")
+
+# join the folder path with the file name to get the full path of the image file
+# image_path = os.path.join(folder_path, image_file)
 
 # print(rectangles)
 

@@ -1,6 +1,9 @@
 import csv
 import os
 import time
+
+# deprecated code
+
 # user input master file path
 # csv_file_path = input('Enter the path to the CSV file: ')
 
