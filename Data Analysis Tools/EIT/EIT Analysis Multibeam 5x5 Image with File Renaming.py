@@ -23,8 +23,8 @@ start_time = time.time()
 # For example: C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 11 2024\138C\5X5 Trans5 50mm cell 138C 290MHz 3037MHz
 # No need to double lashes in the file path
 # Important: Keep the r in front of the quotation mark
-data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 13 2024\GSW 5X4 Trans7.5 125C 290MHz 3036MHz"
-output_file_name = "Results 1"
+data_folder_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 24 2024\5x4 110C 400MHz 3038 MHz"
+output_file_name = "Results 2"
 
 # path to the csv that maps the 0-20 values to actual powers of the beam
 csv_file_path = r'C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\Apr 16 2024\5X5 Mod Depth to Power updated.csv'

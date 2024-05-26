@@ -12,7 +12,7 @@ import numpy as np
 ### ---------------------------------------------------------------------------------------------------------------- ###
 
 # Load image
-master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 13 2024\GSW 5X4 Trans7.5 125C 290MHz 3036MHz"
+master_file_path = r"C:\Users\zxq220007\Box\Quantum Optics Lab\TeTON OANN Testbed\Data 2024\May 24 2024\5x4 110C 400MHz 3038 MHz"
 image_path = os.path.join(master_file_path, "ROI.tif")
 image = cv2.imread(image_path)
 if image is None:
