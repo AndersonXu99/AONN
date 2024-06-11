@@ -49,7 +49,7 @@ class DcamLiveCapturing:
             if imax > 0:
                 imul = int(65535 / imax)
                 data = data * imul
-
+            cv2.namedWindow(windowtitle, cv2.WINDOW_NORMAL)
             cv2.imshow(windowtitle, data)
             return 1
         else:
