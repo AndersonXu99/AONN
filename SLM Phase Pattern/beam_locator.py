@@ -97,4 +97,4 @@ class CrosshairLocator:
                 bottom_right = [top_left[0] + self.beam_diameter, top_left[1] + self.beam_diameter]
                 
                 # Store the corners in the array
-                self.beam_corners[i * self.number_of_rows + j] = [top_left, bottom_right]
+                self.beam_corners[i * self.rows + j] = [top_left, bottom_right]

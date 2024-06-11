@@ -3,7 +3,9 @@ from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import time
 
 def gs_iteration_modified(size_real, weight, interval, phi, e):
+
     def GS_algorithm(phase, weight):
+        
         size_ = (size_part - 1) / 2
         X, Y = np.meshgrid(np.arange(-size_[0], size_[0] + 1), np.arange(-size_[1], size_[1] + 1))
         A0 = np.exp(-((X.T) ** 2) / (1000 ** 2) - (Y.T ** 2) / (1000 ** 2)) * np.exp(1j * phase)
