@@ -8,8 +8,9 @@ import sys
 from dcam_live_capturing import *
 from beam_locator import *
 import holoeye.slmdisplaysdk as slm
-from GS_algorithm1 import *
+from GS_algorithm_first_iteration import *
 from GS_algorithm2 import *
+from SLM_Control import *
 
 ### Initilization ###
 number_of_rows = 5
@@ -17,137 +18,60 @@ number_of_columns = 5
 Dim = np.array([12, 12])
 weight = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
 interval = 50
+size_real = np.array([1920, 1080]) 
+size_real = size_real / Dim 
+temp = np.zeros(number_of_columns * number_of_rows)
+temp[:len(weight)] = weight  
+weight_shaped = np.reshape(temp, (number_of_columns, number_of_rows))
+weight_shaped = np.flipud(weight_shaped)
 
 # Before any phase patterns are initialized, we want to first capture the background image
 # Create DcamLiveCapturing instance
 dcam_capture = DcamLiveCapturing(iDevice = 0)
 background_image = dcam_capture.capture_single_frame()
 
-# after the background image is captured, we want to display a uniform distribution on the SLM display
-
-def show_phase_pattern_on_slm(phase_array):
-    """
-    Displays a phase pattern on the HOLOEYE SLM using official methods.
-
-    Args:
-        phase_array (numpy.ndarray): 1D array containing the phase values.
-
-    Returns:
-        None
-    """
-    try:
-        # Initialize SLM display (replace with actual initialization)
-        slm_device = slm.SLMDevice()
-
-        # Reshape the 1D phase array to match the SLM resolution (replace with actual resolution)
-        slm_width, slm_height = slm_device.get_resolution()
-        phase_matrix = np.reshape(phase_array, (slm_height, slm_width))
-
-        # Set the phase pattern on the SLM (replace with actual method to set phase)
-        slm_device.set_phase(phase_matrix)
-
-        print("Phase pattern displayed on HOLOEYE SLM successfully.")
-    except ImportError:
-        print("Error: holoeye.slmdisplaysdk library not installed.")
-    except Exception as e:
-        print(f"Error: {e}")
-
-
 # Capture live images
 dcam_capture = DcamLiveCapturing(iDevice = 0)
 captured_image = dcam_capture.capture_live_images()
 
+# iterate through the 144 parts of the SLM
+for part in range(1, 145):
+    # for each part, we want to generate the pattern using the two GS algorithms for at most 80 times
+    for time in range(1, 81):
+        if time == 1:
+            # Run the first iteration of the GS algorithm to show the location of the beams
+            Pattern_part, phi = gsw_output(size_real, weight_shaped, interval)
+            Pattern_last = Pattern_part
 
+            if part == 1 and time == 1:
+                # on the very first iteration, we want to run the beam locator to get the cursor locations
+                beam_locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)   
+                beam_locator.run()
 
-# Check if an image was captured
-if captured_image is not None:
-    print("Image captured successfully.")
-    print(captured_image)
+        else:
+            Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
 
-    # Display the captured image using OpenCV
-    cv2.imshow("Captured Image", captured_image)
-    while True:
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # after we have obtain the pattern, we want to display it on the SLM using the SLM_Control class
+        slm = SLMControler()
+        
+        # check if the pattern is in the correct shape
+        if Pattern_part.shape != (slm.dataWidth, slm.dataHeight):
+            # print out an error messgae
+            print("Pattern shape is not correct")
             break
-    cv2.destroyAllWindows()  # Close the window
-else:
-    print("No image captured.")
 
-# now that the image has been captured, we want to display the image so the user can use it indicate the location of the beams
-# Create CrosshairLocator instance
-locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)
+        # Pattern_last = Pattern_part
+        slm.display_data(Pattern_part)
+        # slm.close()
 
-# Display image with crosshairs and allow user interaction
-locator.display_image_with_crosshairs()
-
-# Get cursor locations
-cursor_locations = locator.get_cursor_locations()
-# print("Cursor Locations:", cursor_locations)
-
-locator.calculate_all_beam_locations()
-
-print("Beam Corners:", locator.beam_corners)
-
-def generate_pattern_time_zero(size_real, weight_shaped, interval):
-    """
-    Generates the pattern for time = 0.
-
-    Args:
-        size_real (numpy.ndarray): Array containing the real size of the pattern.
-        weight_shaped (numpy.ndarray): Array containing the shaped weights.
-        interval (int): Interval value.
-
-    Returns:
-        numpy.ndarray: Generated pattern.
-    """
-    Pattern_part, phi = gsw_output(size_real, weight_shaped, interval)
-    Pattern_last = Pattern_part
-    return Pattern_part, Pattern_last, phi
-
-
-def generate_pattern_other_time(size_real, weight_shaped, interval, Pattern_last, e):
-    """
-    Generates the pattern for time other than 0.
-
-    Args:
-        size_real (numpy.ndarray): Array containing the real size of the pattern.
-        weight_shaped (numpy.ndarray): Array containing the shaped weights.
-        interval (int): Interval value.
-        Pattern_last (numpy.ndarray): Last pattern generated.
-        e (int): Error value.
-
-    Returns:
-        numpy.ndarray: Generated pattern.
-    """
-    Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
-    # Pattern_last = Pattern_part
-    return Pattern_part, phi
+        # put a delay of 0.5 seconds to make sure the SLM is properly displaying
+        time.sleep(0.5) 
+        
 
 # after this, we want to take a measurement of the beam using the camera, then calculate the measured weight matrix
 def measured_weight ():
     pass
 
-def process_weights(W_mea, W_theory, Rescale, partnum, Times):
-    # Times is the number of frames that are captured
-    if partnum % 12 > 5:
-        Rescale *= 1.5
-
-    temp = W_mea.shape
-
-    if temp[0] != 1 and temp[1] != 1:
-        W_theory = W_theory[:W_mea.shape[1]]
-        weight_measure = np.mean(W_mea)
-        weight_measure /= Rescale
-        errorstd = np.std(weight_measure - W_theory)
-        errormean = np.mean(weight_measure - W_theory)
-    else:
-        W_theory = W_theory[:W_mea.shape[1]*Times]
-        W_theory = np.reshape(W_theory, (Times, W_mea.shape[1]))
-        weight_measure = W_mea / Rescale
-        errorstd = np.std(weight_measure - W_theory)
-        errormean = np.mean(weight_measure - W_theory)
-
-    return W_theory, weight_measure, errorstd, errormean
     
 
 size_real = np.array([1920, 1080]) // Dim
@@ -176,7 +100,7 @@ Pattern[int(y*size_real[1]):int((y+1)*size_real[1]), int(x*size_real[0]):int((x+
 if Pattern.shape != (1080, 1920):
     Pattern = Pattern.T
 
-Pattern = np.mod(Pattern + Correction, 2 * np.pi)
+# Pattern = np.mod(Pattern + Correction, 2 * np.pi)
 
 ######
 

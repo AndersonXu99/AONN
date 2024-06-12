@@ -1,7 +1,38 @@
 import cv2
 import numpy as np
+from dcam_live_capturing import *
 
 class CrosshairLocator:
+    """
+    A class used to locate and draw crosshairs on an image.
+
+    ...
+
+    Attributes
+    ----------
+    image : ndarray
+        The image on which the crosshairs are drawn.
+    cursor_locations : list
+        A list of tuples representing the (x, y) coordinates of the crosshairs.
+    dragging : bool
+        A flag indicating whether a crosshair is currently being dragged.
+    current_cursor : int
+        The index of the current cursor being dragged.
+    crosshair_length : int
+        The length of the crosshair lines.
+    rows : int
+        The number of rows in the image.
+    cols : int
+        The number of columns in the image.
+
+    Methods
+    -------
+    draw_crosshair(img, center):
+        Draws a crosshair at the specified center location on the image.
+
+    display_image_with_crosshairs():
+        Displays the image with crosshairs at the cursor locations.
+    """
     def __init__(self, image, number_of_rows, number_of_cols):
         self.image = image
         self.cursor_locations = [(100, 100), (1700, 100), (200, 200), (100, 1700)]  # Initialize cursor locations
@@ -98,3 +129,49 @@ class CrosshairLocator:
                 
                 # Store the corners in the array
                 self.beam_corners[i * self.rows + j] = [top_left, bottom_right]
+
+
+# The main function that will call the class the display the image with crosshairs after the user has selected the cursor locations, the beam locations will be calculated 
+# and stored in a text file
+def main():
+    number_of_rows = 5
+    number_of_columns = 5
+
+    dcam_capture = DcamLiveCapturing(iDevice = 0)
+    captured_image = dcam_capture.capture_live_images()
+
+    # Check if an image was captured
+    if captured_image is not None:
+        print("Image captured successfully.")
+        print(captured_image)
+
+        # Create a resizable window
+        cv2.namedWindow("Captured Image", cv2.WINDOW_NORMAL)
+
+        # Display the captured image using OpenCV
+        cv2.imshow("Captured Image", captured_image)
+        while True:
+            if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty("Captured Image", cv2.WND_PROP_VISIBLE) < 1:
+                break
+        cv2.destroyAllWindows()  # Close the window
+
+        locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)
+
+        # Display image with crosshairs and allow user interaction
+        locator.display_image_with_crosshairs()
+
+        # Get cursor locations
+        cursor_locations = locator.get_cursor_locations()
+
+        # save the cursor locations to a text file
+        with open("cursor_locations.txt", "w") as f:
+            for loc in cursor_locations:
+                f.write(f"{loc[0]}, {loc[1]}\n")
+
+        # print("Cursor Locations:", cursor_locations)
+
+        locator.calculate_all_beam_locations()
+
+        print("Beam Corners:", locator.beam_corners)
+    else:
+        print("No image captured.")

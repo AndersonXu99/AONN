@@ -3,6 +3,25 @@ from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import time
 
 def gsw_output(size_real, weight, interval):
+    """
+    Function to generate the output of the Gerchberg-Saxton (GS) algorithm.
+
+    Parameters
+    ----------
+    size_real : list
+        The real size of the SLM.
+    weight : numpy.ndarray
+        The weight matrix for the GS algorithm.
+    interval : int
+        The interval for the GS algorithm.
+
+    Returns
+    -------
+    Image_SLM : numpy.ndarray
+        The image to be displayed on the SLM.
+    phi : numpy.ndarray
+        The phase matrix from the GS algorithm.
+    """
     def IntensityMeasure(B, position):
         rc = (position[:, 1] - position[:, 0] + 1) / interval
         power = np.zeros((rc[0], rc[1]))
@@ -54,7 +73,9 @@ def gsw_output(size_real, weight, interval):
         ratio = 4
 
         
-    size_part = [1, 1] * size_real[0] * ratio
+    # size_part = [1, 1] * size_real[0] * ratio
+
+    size_part = [1, 1] * int(round(size_real[0] * ratio))
     padnum = (size_part - size_real) / 2
     real_rect = np.array([[padnum[0] + 1, padnum[0] + size_real[0]], [padnum[1] + 1, padnum[1] + size_real[1]]])
     At, position = Multibeam(np.sqrt(weight))

@@ -21,6 +21,31 @@ from dcam import *
 import numpy as np
 
 class DcamLiveCapturing:
+    """
+    A class used to capture live images from a DCAM device.
+
+    Attributes
+    ----------
+    iDevice : int
+        The device index.
+    dcam : Dcam
+        An instance of the Dcam class.
+
+    Methods
+    -------
+    __init__(iDevice=0):
+        Initializes the DcamLiveCapturing class with the specified device index.
+    dcamtest_show_framedata(data, windowtitle, windowstatus):
+        Displays the captured image data in a window.
+    dcamtest_thread_live():
+        Captures and displays live images until the window is closed or 'q' is pressed.
+        If 'c' is pressed, the current image is saved as 'captured_image.png' and returned as a numpy array.
+    capture_live_images():
+        Initializes the DCAM API, opens the device, allocates the buffer, captures live images, and then cleans up.
+    capture_single_frame():
+        Initializes the DCAM API, opens the device, allocates the buffer, captures a single frame, and then cleans up.
+    """
+    
     def __init__(self, iDevice=0):
         self.iDevice = iDevice
         self.dcam = None

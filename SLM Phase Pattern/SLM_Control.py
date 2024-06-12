@@ -7,6 +7,7 @@
 #                                                                    #
 # You may use this file under the terms and conditions of the        #
 # "HOLOEYE SLM Display SDK Standard License v1.0" license agreement. #
+#                                                                    #
 # This code modified by Anderson Xu                                  #
 #                                                                    #
 #--------------------------------------------------------------------#
@@ -17,6 +18,31 @@ from showSLMPreview import showSLMPreview
 import random
 
 class SLMControler: 
+    """
+    A class used to control the Spatial Light Modulator (SLM).
+
+    Attributes
+    ----------
+    slm : SLMInstance
+        An instance of the SLM.
+    dataWidth : int
+        The width of the SLM in pixels.
+    dataHeight : int
+        The height of the SLM in pixels.
+
+    Methods
+    -------
+    __init__():
+        Initializes the SLM controller, opens the SLM window, checks the library version,
+        and opens the SLM preview window in "Fit" mode. It also reserves memory for the data
+        that will be displayed on the SLM.
+    display_data(data):
+        Takes a 2D array `data` as input, checks if its shape matches the SLM's shape, and
+        displays the data on the SLM.
+    close():
+        Waits until the SLM process is closed, then unloads the SDK.
+    """
+    
     def __init__(self):
         # Open the SLM window:
         self.slm = slmdisplaysdk.SLMInstance()
@@ -62,18 +88,18 @@ class SLMControler:
 
 
 # Use Case
-slm = SLMControler()
+# slm = SLMControler()
 
-data = slmdisplaysdk.createFieldSingle(slm.dataWidth, slm.dataHeight)
-# print("dataWidth = " + str(dataWidth))
-# print("dataHeight = " + str(dataHeight))
+# data = slmdisplaysdk.createFieldSingle(slm.dataWidth, slm.dataHeight)
+# # print("dataWidth = " + str(dataWidth))
+# # print("dataHeight = " + str(dataHeight))
 
-# creating a random phase pattern
-for y in range(slm.dataHeight):
-    row = data[y]
+# # creating a random phase pattern
+# for y in range(slm.dataHeight):
+#     row = data[y]
 
-    for x in range(slm.dataWidth):
-        row[x] = random.random() 
+#     for x in range(slm.dataWidth):
+#         row[x] = random.random() 
 
-slm.display_data(data)
-slm.close()
+# slm.display_data(data)
+# slm.close()
