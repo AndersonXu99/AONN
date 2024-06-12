@@ -16,7 +16,8 @@ from SLM_Control import *
 number_of_rows = 5
 number_of_columns = 5
 Dim = np.array([12, 12])
-weight = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
+# the weight matrix will be a 1D array of 25 elements with uniform weights that sum to 1
+weight = np.ones(number_of_columns * number_of_rows) / (number_of_columns * number_of_rows)
 interval = 50
 size_real = np.array([1920, 1080]) 
 size_real = size_real / Dim 
@@ -35,12 +36,15 @@ dcam_capture = DcamLiveCapturing(iDevice = 0)
 captured_image = dcam_capture.capture_live_images()
 
 # iterate through the 144 parts of the SLM
+
+# part goes from 1 to 144
+
 for part in range(1, 145):
     # for each part, we want to generate the pattern using the two GS algorithms for at most 80 times
     for time in range(1, 81):
         if time == 1:
             # Run the first iteration of the GS algorithm to show the location of the beams
-            Pattern_part, phi = gsw_output(size_real, weight_shaped, interval)
+            Pattern_part, phi = gsw_output(size_real, weight_shaped, interval, number_of_rows, number_of_columns)
             Pattern_last = Pattern_part
 
             if part == 1 and time == 1:
@@ -74,31 +78,31 @@ def measured_weight ():
 
     
 
-size_real = np.array([1920, 1080]) // Dim
-Pattern = np.zeros((1080, 1920))
-Pattern_last = np.zeros((1080, 1920))
-e = 0
+# size_real = np.array([1920, 1080]) // Dim
+# Pattern = np.zeros((1080, 1920))
+# Pattern_last = np.zeros((1080, 1920))
+# e = 0
 
-temp = np.zeros(number_of_columns * number_of_rows)
-temp[:len(weight)] = weight  # W1
-weight_shaped = np.reshape(temp, (number_of_columns, number_of_rows))
+# temp = np.zeros(number_of_columns * number_of_rows)
+# temp[:len(weight)] = weight  # W1
+# weight_shaped = np.reshape(temp, (number_of_columns, number_of_rows))
 
-weight_shaped = np.flipud(weight_shaped)
+# weight_shaped = np.flipud(weight_shaped)
 
-# if time == 0:
-#     Pattern_part, phi = gsw_output(size_real, weight_shaped, interval)
-#     Pattern_last = Pattern_part
-# else:
-#     Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)  # after the first iteration, we have a measured weight
-#     Pattern_last = Pattern_part
+# # if time == 0:
+# #     Pattern_part, phi = gsw_output(size_real, weight_shaped, interval)
+# #     Pattern_last = Pattern_part
+# # else:
+# #     Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)  # after the first iteration, we have a measured weight
+# #     Pattern_last = Pattern_part
 
-x = Dim[0] - 1 - np.mod(part - 1, Dim[0])
-y = np.floor((part - 1) / Dim[0])
+# x = Dim[0] - 1 - np.mod(part - 1, Dim[0])
+# y = np.floor((part - 1) / Dim[0])
 
-Pattern[int(y*size_real[1]):int((y+1)*size_real[1]), int(x*size_real[0]):int((x+1)*size_real[0])] = Pattern_part
+# Pattern[int(y*size_real[1]):int((y+1)*size_real[1]), int(x*size_real[0]):int((x+1)*size_real[0])] = Pattern_part
 
-if Pattern.shape != (1080, 1920):
-    Pattern = Pattern.T
+# if Pattern.shape != (1080, 1920):
+#     Pattern = Pattern.T
 
 # Pattern = np.mod(Pattern + Correction, 2 * np.pi)
 
@@ -185,4 +189,42 @@ if Pattern.shape != (1080, 1920):
 # errorstd=std(weight_measure-W_theory);
 # errormean=mean(weight_measure-W_theory);
 
+# end
+
+# cd 'C:\Linear Operations\code\linear_iteration_1stSLM'
+
+# size_real=[part_width, part_length];
+# Pattern=zeros(SLM_length,SLM_width);
+
+# Pattern=mod([1:SLM_width],5)/5*2*pi;
+# Pattern=repmat(Pattern,SLM_length,1);
+
+
+# temp=zeros(1,Column*Row);
+# temp(1:length(weight))=weight;
+# weight_shaped=reshape(temp,Column,Row);
+
+
+# if time==0 
+#   [Pattern_part,phi]=gsw_output(size_real, weight_shaped,interval);
+# else
+#  balance=0;
+#   [Pattern_part,phi]=gs_iteration_modified(size_real,weight_shaped,interval,Pattern_last,balance);
+# end
+
+# grating = -mod([1:part_width], 40)*2*pi/40;
+# grating = repmat(grating, part_length,1);
+
+
+# %areaxy=[1720, 880];
+# areaxy=[1, 1];
+
+
+# Pattern(areaxy(2):areaxy(2)+part_length-1,areaxy(1):areaxy(1)+part_width-1)=Pattern_part+grating;
+
+# %Pattern(1:2000,1:3600)=repmat(Pattern_part+grating,5,9);
+
+
+# if size(Pattern)~=[SLM_length,SLM_width]
+# Pattern=Pattern';
 # end
