@@ -23,6 +23,7 @@ class ImageProcessor:
 
         Image_pre = np.zeros((self.lengthpre*xwidth, ywidth))
         index = 0
+        
         for ii in range(self.Column):
             for i in range(self.Row):
                 ind = (i)*self.Column+ii
@@ -32,6 +33,7 @@ class ImageProcessor:
                     y_s = ybegin + round( (i) *(self.Parameter[5]/(self.Row-1))+(ii)*self.Parameter[7]/(self.Column-1))
                     part = self.Image[x_s : x_s + xwidth, y_s : y_s+ywidth]
                     Image_pre[(index-1) * xwidth : index * xwidth, :] = part
+    
         return Image_pre.T
 
     def measurecal(self):
@@ -40,15 +42,19 @@ class ImageProcessor:
         xbegin = int(self.Parameter[0])
         ybegin = int(self.Parameter[1])
         Image_pre = np.zeros((self.Row*self.Column*xwidth, ywidth))
+
         weight_measured = np.zeros(self.Row*self.Column)
+
         for ii in range(self.Column):
             for i in range(self.Row):
-                ind = (i)*self.Column+ii
+                ind = (i) * self.Column+ii
                 if ind > self.Row*self.Column:
                     break
-                x_s = xbegin + round((ii)*(self.Parameter[4]/(self.Column-1))+(i)*self.Parameter[6]/(self.Row-1))
+
+                x_s = xbegin + round((ii) * (self.Parameter[4] / (self.Column-1)) + (i) * self.Parameter[6] / (self.Row-1))
                 y_s = ybegin + round((i)*(self.Parameter[5]/(self.Row-1))+(ii)*self.Parameter[7]/(self.Column-1))
-                part = self.Image[x_s:x_s+xwidth, y_s:y_s+ywidth]
+
+                part = self.Image[x_s : x_s+xwidth, y_s : y_s + ywidth]
                 Image_pre[(ind-1)*xwidth:ind*xwidth, :] = part
                 weight_measured[ind] = np.sum(part)
         return Image_pre.T, weight_measured
