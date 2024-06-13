@@ -22,10 +22,10 @@
 
 % %Pattern=repmat(Pattern_part,Dim(1),Dim(2));
 
-% x=Dim(1)-1-mod(part-1,Dim(1));
+% x=Dim(1) - 1 - mod(part - 1, Dim(1));
 % y=floor((part-1)/Dim(1));
 
-% Pattern(y*size_real(2)+1:(y+1)*size_real(2),x*size_real(1)+1:(x+1)*size_real(1))=Pattern_part;
+% Pattern(y*size_real(2)+1 : (y+1)*size_real(2),x*size_real(1)+1:(x+1)*size_real(1))=Pattern_part;
 
 
 % if size(Pattern)~=[1080,1920]

@@ -35,11 +35,14 @@ def gsw_output(size_real, weight, interval, Row, Column):
         return power, power_sum
 
     def GS_algorithm(phase, g, position):
+        # getting the radius of the beam 
         size_ = (size_part - 1) / 2
+        # creating a meshgrid with the center being (0, 0)
         X, Y = np.meshgrid(np.arange(-size_[0], size_[0] + 1), np.arange(-size_[1], size_[1] + 1))
+
         A0 = np.exp(-((X.T) ** 2) / (1000 ** 2) - (Y.T ** 2) / (1000 ** 2)) * np.exp(1j * phase)
         B0 = fftshift(fft2(A0, (size_part[0], size_part[1])))
-        A0 = A0[int(real_rect[0, 0]):int(real_rect[0, 1]), int(real_rect[1, 0]):int(real_rect[1, 1])]
+        A0 = A0[int(real_rect[0, 0]) : int(real_rect[0, 1]), int(real_rect[1, 0]) : int(real_rect[1, 1])]
         B = fftshift(fft2(A0, (size_part[0], size_part[1])))
         ak = np.sqrt(IntensityMeasure(B, position)[0])
         g_next = (np.sqrt(weight) / np.sum(np.sqrt(weight))) / (ak / np.sum(ak)) * g
@@ -51,6 +54,7 @@ def gsw_output(size_real, weight, interval, Row, Column):
         return Output, g_next
 
     def Multibeam(weight):
+        # the weight matrix comes in the form of a matrix
         row, column = weight.shape
         # interval is the distance between two beams also the diameter of a single beam
         # the single_r will be the radius of a single beam
@@ -68,7 +72,8 @@ def gsw_output(size_real, weight, interval, Row, Column):
                 # fix the indexing when translating from MATLAB
                 Multi[(i) * interval: (i+1) * interval, (ii) * interval: (ii + 1) * interval] = Multi[(i) * interval: (i + 1) * interval, (ii) * interval: (ii + 1) * interval] * weight[i, ii] # weight is a matrix with row x col
         
-        # Multi_x = 
+        # Multi_x = single_r * 2 * col
+        # Multi_y = single_r * 2 * row
         Multi_x, Multi_y = Multi.shape
         Multipattern = np.zeros(size_part)
 
@@ -80,20 +85,22 @@ def gsw_output(size_real, weight, interval, Row, Column):
     # start_time = time.time()
 
     w0 = 1
+
+    # what is the ratio for? 
     if size_real[0] > 500:
         ratio = 2
     else:
         ratio = 4
 
-        
-    # size_part = [1, 1] * size_real[0] * ratio
+    weight_shaped= np.reshape(weight[ : Row*Column], (Column, Row))
+    weight_shaped= np.transpose(weight_shaped)                              
+    weight_shaped= np.flipud(weight_shaped)                                 
 
-    weight_shaped= np.reshape(weight[ : Row*Column], (Column, Row))         # not part of gsw
-    weight_shaped= np.transpose(weight_shaped)                              # not part of gsw
-    weight_shaped= np.flipud(weight_shaped)                                 # not part of gsw
+    size_part = [1 * size_real[0] * ratio, 1 * size_real[0] * ratio]
+    # for some reason we want to scale up from the size real
+    # size_part = [640, 640]
+    padnum = [(sp - sr) / 2 for sp, sr in zip(size_part, size_real)]
 
-    size_part = [1, 1] * int(round(size_real[0] * ratio))
-    padnum = (size_part - size_real) / 2
     real_rect = np.array([[padnum[0] + 1, padnum[0] + size_real[0]], [padnum[1] + 1, padnum[1] + size_real[1]]])
     _, position = Multibeam(np.sqrt(weight))
     Phase0 = np.random.rand(size_part[0], size_part[1])

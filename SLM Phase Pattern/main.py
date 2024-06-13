@@ -1,4 +1,4 @@
-import cv2
+# import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -53,7 +53,8 @@ for part in range(1, 145):
                 beam_locator.run()
 
         else:
-            Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
+            pass
+            # Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
 
         # after we have obtain the pattern, we want to display it on the SLM using the SLM_Control class
         slm = SLMControler()
