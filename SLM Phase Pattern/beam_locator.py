@@ -175,3 +175,7 @@ def main():
         print("Beam Corners:", locator.beam_corners)
     else:
         print("No image captured.")
+
+# Call the main function
+if __name__ == "__main__":
+    main()

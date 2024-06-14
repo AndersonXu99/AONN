@@ -1,4 +1,4 @@
-# import cv2
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -13,14 +13,18 @@ from GS_algorithm2 import *
 from SLM_Control import *
 
 ### Initilization ###
-number_of_rows = 5
-number_of_columns = 5
+number_of_rows = 2
+number_of_columns = 2
 Dim = np.array([12, 12])
 # the weight matrix will be a 1D array of 25 elements with uniform weights that sum to 1
-weight = np.ones(number_of_columns * number_of_rows) / (number_of_columns * number_of_rows)
+# weight = np.ones(number_of_columns * number_of_rows) / (number_of_columns * number_of_rows)
+weight = np.array([0.5, 0.5, 0.5, 0.5])
+print(weight)
+
 interval = 50
 size_real = np.array([1920, 1080]) 
 size_real = size_real / Dim 
+size_real = size_real.astype(int)
 temp = np.zeros(number_of_columns * number_of_rows)
 temp[:len(weight)] = weight  
 weight_shaped = np.reshape(temp, (number_of_columns, number_of_rows))
@@ -35,42 +39,71 @@ background_image = dcam_capture.capture_single_frame()
 dcam_capture = DcamLiveCapturing(iDevice = 0)
 captured_image = dcam_capture.capture_live_images()
 
-# iterate through the 144 parts of the SLM
+Pattern_part, phi = gsw_output(size_real, weight_shaped, interval, number_of_rows, number_of_columns)
+# print(Pattern_part.shape)
+# print(phi.shape)
 
-# part goes from 1 to 144
+Pattern = np.zeros((1080,1920))
 
+Dim = np.array([12, 12])
+size_real = np.array([1920, 1080]) 
+size_real = size_real / Dim 
+
+# make sure size_real is an integer
+size_real = size_real.astype(int)
+Pattern = np.zeros((1080, 1920), dtype=np.float64)
+
+# now loop through the phase_data dictionary and extract the Pattern field from each error file
 for part in range(1, 145):
-    # for each part, we want to generate the pattern using the two GS algorithms for at most 80 times
-    for time in range(1, 81):
-        if time == 1:
-            # Run the first iteration of the GS algorithm to show the location of the beams
-            Pattern_part, phi = gsw_output(size_real, weight_shaped, interval, number_of_rows, number_of_columns)
-            Pattern_last = Pattern_part
-
-            if part == 1 and time == 1:
-                # on the very first iteration, we want to run the beam locator to get the cursor locations
-                beam_locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)   
-                beam_locator.run()
-
-        else:
-            pass
-            # Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
-
-        # after we have obtain the pattern, we want to display it on the SLM using the SLM_Control class
-        slm = SLMControler()
         
-        # check if the pattern is in the correct shape
-        if Pattern_part.shape != (slm.dataWidth, slm.dataHeight):
-            # print out an error messgae
-            print("Pattern shape is not correct")
-            break
+    x = int(Dim[0] - 1 - np.mod(part - 1, Dim[0]))
+    y = int(np.floor((part - 1) / Dim[0]))  
+    # print (x, y)
+    Pattern[y*size_real[1]:(y+1)*size_real[1], x*size_real[0]:(x+1)*size_real[0]] = Pattern_part
 
-        # Pattern_last = Pattern_part
-        slm.display_data(Pattern_part)
-        # slm.close()
 
-        # put a delay of 0.5 seconds to make sure the SLM is properly displaying
-        time.sleep(0.5) 
+if Pattern.shape != (1080, 1920):
+    Pattern = Pattern.T
+
+
+slm = SLMControler()
+slm.display_data(Pattern)
+slm.close()
+
+# iterate through the 144 parts of the SLM
+# part goes from 1 to 144
+# for part in range(1, 145):
+#     # for each part, we want to generate the pattern using the two GS algorithms for at most 80 times
+#     for time in range(1, 81):
+#         if time == 1:
+#             # Run the first iteration of the GS algorithm to show the location of the beams
+#             Pattern_part, phi = gsw_output(size_real, weight_shaped, interval, number_of_rows, number_of_columns)
+#             Pattern_last = Pattern_part
+
+#             if part == 1 and time == 1:
+#                 # on the very first iteration, we want to run the beam locator to get the cursor locations
+#                 beam_locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)   
+#                 beam_locator.run()
+
+#         else:
+#             pass
+#             # Pattern_part, phi = gs_iteration_modified(size_real, weight_shaped, interval, Pattern_last, e)
+
+#         # after we have obtain the pattern, we want to display it on the SLM using the SLM_Control class
+#         slm = SLMControler()
+        
+#         # check if the pattern is in the correct shape
+#         if Pattern_part.shape != (slm.dataWidth, slm.dataHeight):
+#             # print out an error messgae
+#             print("Pattern shape is not correct")
+#             break
+
+#         # Pattern_last = Pattern_part
+#         slm.display_data(Pattern_part)
+#         # slm.close()
+
+#         # put a delay of 0.5 seconds to make sure the SLM is properly displaying
+#         time.sleep(0.5) 
         
 
 # after this, we want to take a measurement of the beam using the camera, then calculate the measured weight matrix

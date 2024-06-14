@@ -24,6 +24,7 @@ def gsw_output(size_real, weight, interval, Row, Column):
     """
     def IntensityMeasure(B, position):
         rc = (position[:, 1] - position[:, 0] + 1) / interval
+        rc = rc.astype(int)
         power = np.zeros((rc[0], rc[1]))
         for i in range(rc[0]):
             for ii in range(rc[1]):
@@ -36,10 +37,10 @@ def gsw_output(size_real, weight, interval, Row, Column):
 
     def GS_algorithm(phase, g, position):
         # getting the radius of the beam 
-        size_ = (size_part - 1) / 2
+        size_ = [(part - 1) / 2 for part in size_part]
         # creating a meshgrid with the center being (0, 0)
         X, Y = np.meshgrid(np.arange(-size_[0], size_[0] + 1), np.arange(-size_[1], size_[1] + 1))
-
+        # print (X.shape, Y.shape) => (640, 640)
         A0 = np.exp(-((X.T) ** 2) / (1000 ** 2) - (Y.T ** 2) / (1000 ** 2)) * np.exp(1j * phase)
         B0 = fftshift(fft2(A0, (size_part[0], size_part[1])))
         A0 = A0[int(real_rect[0, 0]) : int(real_rect[0, 1]), int(real_rect[1, 0]) : int(real_rect[1, 1])]
@@ -75,7 +76,7 @@ def gsw_output(size_real, weight, interval, Row, Column):
         # Multi_x = single_r * 2 * col
         # Multi_y = single_r * 2 * row
         Multi_x, Multi_y = Multi.shape
-        Multipattern = np.zeros(size_part)
+        Multipattern = np.zeros((int(size_part[0]), int(size_part[1])))
 
         # gives the poisition ranges of the phase pattern
         position = np.array([[np.floor(size_part[0] / 2) - np.floor(Multi_x / 2), np.floor(size_part[0] / 2) + np.floor(Multi_x / 2)], [np.floor(size_part[1] / 2) - np.floor(Multi_y / 2), np.floor(size_part[1] / 2) + np.floor(Multi_y / 2)]])
@@ -96,19 +97,22 @@ def gsw_output(size_real, weight, interval, Row, Column):
     weight_shaped= np.transpose(weight_shaped)                              
     weight_shaped= np.flipud(weight_shaped)                                 
 
-    size_part = [1 * size_real[0] * ratio, 1 * size_real[0] * ratio]
+    size_part = [int(1 * size_real[0] * ratio), int(1 * size_real[0] * ratio)]
     # for some reason we want to scale up from the size real
     # size_part = [640, 640]
     padnum = [(sp - sr) / 2 for sp, sr in zip(size_part, size_real)]
 
-    real_rect = np.array([[padnum[0] + 1, padnum[0] + size_real[0]], [padnum[1] + 1, padnum[1] + size_real[1]]])
+    real_rect = np.array([[padnum[0], padnum[0] + size_real[0]], [padnum[1], padnum[1] + size_real[1]]])
+    print(real_rect)
+    # print(real_rect.shape)
     _, position = Multibeam(np.sqrt(weight))
-    Phase0 = np.random.rand(size_part[0], size_part[1])
+    Phase0 = np.random.rand(int(size_part[0]), int(size_part[1]))
     g = np.ones(weight.shape)
     phi, _ = GS_algorithm(Phase0, g, position)
     for nn in range(10):
         phi, g = GS_algorithm(phi, g, position)
     Phase_f = phi[int(real_rect[0, 0]):int(real_rect[0, 1]), int(real_rect[1, 0]):int(real_rect[1, 1])]
+    print(Phase_f.shape)
     Phase_n = np.mod(Phase_f, 2 * np.pi)
     Image_SLM = Phase_n.T
     # print("Execution time: ", time.time() - start_time)
