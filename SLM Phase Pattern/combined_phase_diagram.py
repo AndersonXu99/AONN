@@ -96,7 +96,7 @@ for part in phase_data.keys():
         x = int(Dim[0] - 1 - np.mod(part - 1, Dim[0]))
         y = int(np.floor((part - 1) / Dim[0]))  
         # print (x, y)
-        Pattern[y*size_real[1]:(y+1)*size_real[1], x*size_real[0]:(x+1)*size_real[0]] = phase_data[part][error_file]['Pattern']
+        Pattern[y*size_real[1] : (y+1)*size_real[1], x*size_real[0]:(x+1)*size_real[0]] = phase_data[part][error_file]['Pattern']
 
 # plot the combined phase diagram
 plt.imshow(Pattern, cmap='gray')

@@ -182,11 +182,11 @@ class DcamLiveCapturing:
         Dcamapi.uninit()
         return None
 
-# def dcam_live_capturing(iDevice=0):
-#     """Wrapper function for backward compatibility."""
-#     dcam_capture = DcamLiveCapturing(iDevice)
-#     return dcam_capture.capture_live_images()
+def dcam_live_capturing(iDevice=0):
+    """Wrapper function for backward compatibility."""
+    dcam_capture = DcamLiveCapturing(iDevice)
+    return dcam_capture.capture_live_images()
 
 
-# if __name__ == '__main__':
-#     dcam_live_capturing()
+if __name__ == '__main__':
+    dcam_live_capturing()

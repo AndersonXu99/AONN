@@ -2,7 +2,7 @@ import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import time
 
-def gsw_output(size_real, weight, interval, Row, Column):
+def gsw_output(size_real, weight, interval, Row, Column, w0):
     """
     Function to generate the output of the Gerchberg-Saxton (GS) algorithm.
 
@@ -42,9 +42,13 @@ def gsw_output(size_real, weight, interval, Row, Column):
         X, Y = np.meshgrid(np.arange(-size_[0], size_[0] + 1), np.arange(-size_[1], size_[1] + 1))
         # print (X.shape, Y.shape) => (640, 640)
         A0 = np.exp(-((X.T) ** 2) / (1000 ** 2) - (Y.T ** 2) / (1000 ** 2)) * np.exp(1j * phase)
+        # print(A0.shape)
         B0 = fftshift(fft2(A0, (size_part[0], size_part[1])))
+        # print(B0.shape)
         A0 = A0[int(real_rect[0, 0]) : int(real_rect[0, 1]), int(real_rect[1, 0]) : int(real_rect[1, 1])]
+        # print(A0.shape)
         B = fftshift(fft2(A0, (size_part[0], size_part[1])))
+        # print(B.shape)
         ak = np.sqrt(IntensityMeasure(B, position)[0])
         g_next = (np.sqrt(weight) / np.sum(np.sqrt(weight))) / (ak / np.sum(ak)) * g
         weight_next = g_next * np.sqrt(weight)
@@ -85,8 +89,6 @@ def gsw_output(size_real, weight, interval, Row, Column):
 
     # start_time = time.time()
 
-    w0 = 1
-
     # what is the ratio for? 
     if size_real[0] > 500:
         ratio = 2
@@ -103,7 +105,9 @@ def gsw_output(size_real, weight, interval, Row, Column):
     padnum = [(sp - sr) / 2 for sp, sr in zip(size_part, size_real)]
 
     real_rect = np.array([[padnum[0], padnum[0] + size_real[0]], [padnum[1], padnum[1] + size_real[1]]])
-    print(real_rect)
+
+    # real_rect = np.array([[241, 400], [276, 365]])
+
     # print(real_rect.shape)
     _, position = Multibeam(np.sqrt(weight))
     Phase0 = np.random.rand(int(size_part[0]), int(size_part[1]))
@@ -112,7 +116,6 @@ def gsw_output(size_real, weight, interval, Row, Column):
     for nn in range(10):
         phi, g = GS_algorithm(phi, g, position)
     Phase_f = phi[int(real_rect[0, 0]):int(real_rect[0, 1]), int(real_rect[1, 0]):int(real_rect[1, 1])]
-    print(Phase_f.shape)
     Phase_n = np.mod(Phase_f, 2 * np.pi)
     Image_SLM = Phase_n.T
     # print("Execution time: ", time.time() - start_time)
