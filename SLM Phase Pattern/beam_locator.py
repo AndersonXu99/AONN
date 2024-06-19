@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from dcam_live_capturing import *
 
-class CrosshairLocator:
+class beam_locator:
     """
     A class used to locate and draw crosshairs on an image.
 
@@ -41,6 +41,9 @@ class CrosshairLocator:
         self.crosshair_length = 40  # Set the length of the crosshair lines
         self.rows = number_of_rows
         self.cols = number_of_cols
+        # initialize all the beam corners
+        self.total_num_beams = self.rows * self.cols
+        self.beam_corners = np.zeros((self.total_num_beams, self.num_rows, self.num_cols), dtype=float)
 
     def draw_crosshair(self, img, center):
         # Draw vertical line
@@ -90,13 +93,12 @@ class CrosshairLocator:
             self.current_cursor = None
 
     def get_cursor_locations(self):
-
         # sort the cursor locations in the following order, top left, top right, bottom left, bottom right
         self.cursor_locations = sorted(self.cursor_locations, key=lambda x: x[0])
         self.cursor_locations = sorted(self.cursor_locations, key=lambda x: x[1])
 
         return self.cursor_locations
-    
+
     def calculate_all_beam_locations(self):
         # from the first and third elements of the cursor_locations list, we can calculate the diameter of a beam
         # the first element of the array is the top left of the beam and the third element represents the bottom right corner of the beam
@@ -113,10 +115,6 @@ class CrosshairLocator:
         # now from these horizontal and vertical intervals, we can calculate the top left corners of all 25 beams and create a box using the diameter calculated as well
         # store the corners in a 25 x 4 array, for each beam, store the four corners of the box
 
-        # Initialize the array with zeros
-        self.total_num_beams = self.rows * self.cols
-        self.beam_corners = np.zeros((self.total_num_beams, 2, 2), dtype=float)
-
         # Iterate over the rows
         for i in range(self.rows):
             # Iterate over the columns
@@ -129,53 +127,3 @@ class CrosshairLocator:
                 
                 # Store the corners in the array
                 self.beam_corners[i * self.rows + j] = [top_left, bottom_right]
-
-
-# The main function that will call the class the display the image with crosshairs after the user has selected the cursor locations, the beam locations will be calculated 
-# and stored in a text file
-def main():
-    number_of_rows = 5
-    number_of_columns = 5
-
-    dcam_capture = DcamLiveCapturing(iDevice = 0)
-    captured_image = dcam_capture.capture_live_images()
-
-    # Check if an image was captured
-    if captured_image is not None:
-        print("Image captured successfully.")
-        print(captured_image)
-
-        # Create a resizable window
-        cv2.namedWindow("Captured Image", cv2.WINDOW_NORMAL)
-
-        # Display the captured image using OpenCV
-        cv2.imshow("Captured Image", captured_image)
-        while True:
-            if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty("Captured Image", cv2.WND_PROP_VISIBLE) < 1:
-                break
-        cv2.destroyAllWindows()  # Close the window
-
-        locator = CrosshairLocator(captured_image, number_of_rows, number_of_columns)
-
-        # Display image with crosshairs and allow user interaction
-        locator.display_image_with_crosshairs()
-
-        # Get cursor locations
-        cursor_locations = locator.get_cursor_locations()
-
-        # save the cursor locations to a text file
-        with open("cursor_locations.txt", "w") as f:
-            for loc in cursor_locations:
-                f.write(f"{loc[0]}, {loc[1]}\n")
-
-        # print("Cursor Locations:", cursor_locations)
-
-        locator.calculate_all_beam_locations()
-
-        print("Beam Corners:", locator.beam_corners)
-    else:
-        print("No image captured.")
-
-# Call the main function
-if __name__ == "__main__":
-    main()

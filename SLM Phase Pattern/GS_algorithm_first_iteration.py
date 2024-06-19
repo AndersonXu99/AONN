@@ -2,6 +2,12 @@ import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import time
 
+### ---------------------------------------------------------------------------------------------------------------- ###
+### AONN - First Iteration of GSW Algorithm                                                                          ###
+### Author: Anderson Xu                                                                                              ###
+### ---------------------------------------------------------------------------------------------------------------- ###
+
+
 def gsw_output(size_real, weight, interval, Row, Column, w0):
     """
     Function to generate the output of the Gerchberg-Saxton (GS) algorithm.
