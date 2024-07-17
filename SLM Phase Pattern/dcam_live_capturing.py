@@ -141,6 +141,7 @@ class DcamLiveCapturing:
                     captured_image = self.dcamtest_thread_live()
                     self.dcam.buf_release()
                     self.dcam.dev_close()
+                    Dcamapi.uninit()
                     return captured_image
                 else:
                     print('-NG: Dcam.buf_alloc(3) fails with error {}'.format(self.dcam.lasterr()))
@@ -159,12 +160,13 @@ class DcamLiveCapturing:
             if self.dcam.dev_open() is not False:
                 if self.dcam.buf_alloc(3) is not False:
                     if self.dcam.cap_start() is not False:
-                        timeout_milisec = 100
+                        timeout_milisec = 1000
                         if self.dcam.wait_capevent_frameready(timeout_milisec) is not False:
                             data = self.dcam.buf_getlastframedata()
                             self.dcam.cap_stop()
                             self.dcam.buf_release()
                             self.dcam.dev_close()
+                            Dcamapi.uninit()
                             return data
                         else:
                             print('-NG: Dcam.wait_event() fails with error {}'.format(self.dcam.lasterr()))
@@ -182,11 +184,11 @@ class DcamLiveCapturing:
         Dcamapi.uninit()
         return None
 
-def dcam_live_capturing(iDevice=0):
-    """Wrapper function for backward compatibility."""
-    dcam_capture = DcamLiveCapturing(iDevice)
-    return dcam_capture.capture_live_images()
+# def dcam_live_capturing(iDevice=0):
+#     """Wrapper function for backward compatibility."""
+#     dcam_capture = DcamLiveCapturing(iDevice)
+#     return dcam_capture.capture_live_images()
 
 
-if __name__ == '__main__':
-    dcam_live_capturing()
+# if __name__ == '__main__':
+#     dcam_live_capturing()

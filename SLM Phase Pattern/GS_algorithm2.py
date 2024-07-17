@@ -5,7 +5,6 @@ import time
 def gs_iteration_modified(size_real, weight, interval, phi, e, w0):
 
     def GS_algorithm(phase, weight):
-        
         size_ = [(part - 1) / 2 for part in size_part]
         # creating a meshgrid with the center being (0, 0)
         X, Y = np.meshgrid(np.arange(-size_[0], size_[0] + 1), np.arange(-size_[1], size_[1] + 1))
@@ -33,7 +32,10 @@ def gs_iteration_modified(size_real, weight, interval, phi, e, w0):
         position = np.array([[np.floor(size_part[0] / 2) - np.floor(Multi_x / 2), np.floor(size_part[0] / 2) + np.floor(Multi_x / 2)], [np.floor(size_part[1] / 2) - np.floor(Multi_y / 2), np.floor(size_part[1] / 2) + np.floor(Multi_y / 2)]])
         Multipattern[int(position[0, 0]):int(position[0, 1]), int(position[1, 0]):int(position[1, 1])] = Multi
         if e > 0:
-            Multipattern[int(position[0, 0]) - singlepattern.shape[0] + 1:int(position[0, 0]), int(Multipattern.shape[1] / 2) - int(singlepattern.shape[1] / 2) + 1:int(Multipattern.shape[1] / 2) - int(singlepattern.shape[1] / 2) + singlepattern.shape[1]] = singlepattern * e
+            print("check")
+            Multipattern[int(position[0, 0]) - singlepattern.shape[0] : int(position[0, 0]), int(Multipattern.shape[0] / 2) - int(singlepattern.shape[0] / 2) : int(Multipattern.shape[0] / 2) - int(singlepattern.shape[0] / 2) + singlepattern.shape[0] ] = singlepattern * e
+            # print out the numerical value of the multipattern
+            print(Multipattern)
         return Multipattern, position
 
     if size_real[0] > 500:

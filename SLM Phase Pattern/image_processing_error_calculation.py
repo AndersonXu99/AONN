@@ -1,7 +1,7 @@
 import numpy as np
 
 class ImageProcessor:
-    def __init__(self, Image, Row, Column, Parameter, ind_begin, lengthpre, W_theory, partnum, Rescale, C_x, C_y):
+    def __init__(self, Image, Row, Column, Parameter, ind_begin, lengthpre, W_theory, partnum, Rescale):
         self.Image = Image.T
         self.Row = Row
         self.Column = Column
@@ -12,8 +12,6 @@ class ImageProcessor:
         self.W_theory = W_theory
         self.partnum = partnum
         self.Rescale = Rescale
-        self.C_x = C_x
-        self.C_y = C_y
 
     def measuresequence(self):
         xwidth = int(self.Parameter[2])
@@ -21,7 +19,7 @@ class ImageProcessor:
         xbegin = int(self.Parameter[0])
         ybegin = int(self.Parameter[1])
 
-        Image_pre = np.zeros((self.lengthpre*xwidth, ywidth))
+        Image_pre = np.zeros((self.lengthpre * xwidth, ywidth))
         index = 0
         
         for ii in range(self.Column):
@@ -59,17 +57,6 @@ class ImageProcessor:
                 weight_measured[ind] = np.sum(part)
         return Image_pre.T, weight_measured
 
-    def disablepoint(disable, RandomSet, Row, Column, Center_x, Center_y):
-        ind_dis = []
-        if disable != 0:
-            for x in range(Column):
-                for y in range(Row):
-                    if ((x-Center_x))**2+(y-Center_y)**2 < (disable**2):
-                        ind_dis.append((y)*Column+x)
-        Set = RandomSet.copy()
-        Set[:, ind_dis] = 0
-        return ind_dis, Set
-
     def main(self, ifshow):
         if (self.partnum-1) % 15 > 5:
             self.Rescale *= ((self.partnum-1) % 15 + 35) / 35
@@ -82,7 +69,6 @@ class ImageProcessor:
             disable = 2
             ind_dis, _ = self.disablepoint(disable)
             _, weight_measured = self.measurecal()
-            weight_measured[ind_dis] = 0
             Image_pre = [0, 0, 0, 0]
             Rescale_c = weight_measured / (self.Row * self.Column - len(ind_dis))
 
