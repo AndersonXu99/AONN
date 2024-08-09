@@ -6,6 +6,7 @@ class beam_locator:
     def __init__(self, image, number_of_rows, number_of_cols):
         self.image = image
         self.cursor_locations = [(1000, 100), (1700, 100), (200, 200), (100, 1700)]  # Initialize cursor locations
+        self.cursor_colors = [(0, 0, 255), (0, 255, 255), (0, 165, 255), (0, 255, 0)]  # Red, Orange, Yellow, Green
         self.dragging = False
         self.current_cursor = None
         self.crosshair_length = 40  # Set the length of the crosshair lines
@@ -15,13 +16,13 @@ class beam_locator:
         self.total_num_beams = self.rows * self.cols
         self.beam_corners = np.zeros((self.total_num_beams, 2, 2), dtype=float)
 
-    def draw_crosshair(self, img, center):
+    def draw_crosshair(self, img, center, color):
         # Draw vertical line
         cv2.line(img, (center[0], center[1] - self.crosshair_length // 2),
-                 (center[0], center[1] + self.crosshair_length // 2), (0, 255, 0), 2)
+                 (center[0], center[1] + self.crosshair_length // 2), color, 2)
         # Draw horizontal line
         cv2.line(img, (center[0] - self.crosshair_length // 2, center[1]),
-                 (center[0] + self.crosshair_length // 2, center[1]), (0, 255, 0), 2)
+                 (center[0] + self.crosshair_length // 2, center[1]), color, 2)
 
     def display_image_with_crosshairs(self):
         cv2.namedWindow('Image with Crosshairs', cv2.WINDOW_NORMAL)  # Resizable window
@@ -36,9 +37,9 @@ class beam_locator:
             if len(img.shape) == 2:  # Check if the image is grayscale
                 img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-            # Draw crosshairs at cursor locations
-            for loc in self.cursor_locations:
-                self.draw_crosshair(img, loc)
+            # Draw crosshairs at cursor locations with their respective colors
+            for loc, color in zip(self.cursor_locations, self.cursor_colors):
+                self.draw_crosshair(img, loc, color)
 
             cv2.imshow('Image with Crosshairs', img)
 
@@ -71,14 +72,19 @@ class beam_locator:
 
     def get_cursor_locations(self):
         # sort the cursor locations in the following order, top left, top right, bottom left, bottom right
-        self.cursor_locations = sorted(self.cursor_locations, key=lambda x: x[0])
-        self.cursor_locations = sorted(self.cursor_locations, key=lambda x: x[1])
+        print("Cursor Locations:", self.cursor_locations)
+
+        # self.cursor_locations = sorted(self.cursor_locations, key=lambda x: (x[1], x[0]))
+
+        print("Sorted Cursor Locations:", self.cursor_locations)
 
         return self.cursor_locations
 
     def calculate_all_beam_locations(self):
         # from the first and third elements of the cursor_locations list, we can calculate the diameter of a beam
         # the first element of the array is the top left of the beam and the third element represents the bottom right corner of the beam
+        # print out the calculation for debugging purposes
+        print("Calculations for Beam Diameter:", self.cursor_locations[2][0], self.cursor_locations[0][0], self.cursor_locations[2][1], self.cursor_locations[0][1])
         self.beam_diameter = np.sqrt((self.cursor_locations[2][0] - self.cursor_locations[0][0])**2 + (self.cursor_locations[2][1] - self.cursor_locations[0][1])**2)
         print("Beam Diameter:", self.beam_diameter)
 

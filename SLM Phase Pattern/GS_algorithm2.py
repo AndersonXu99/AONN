@@ -32,10 +32,7 @@ def gs_iteration_modified(size_real, weight, interval, phi, e, w0):
         position = np.array([[np.floor(size_part[0] / 2) - np.floor(Multi_x / 2), np.floor(size_part[0] / 2) + np.floor(Multi_x / 2)], [np.floor(size_part[1] / 2) - np.floor(Multi_y / 2), np.floor(size_part[1] / 2) + np.floor(Multi_y / 2)]])
         Multipattern[int(position[0, 0]):int(position[0, 1]), int(position[1, 0]):int(position[1, 1])] = Multi
         if e > 0:
-            print("check")
             Multipattern[int(position[0, 0]) - singlepattern.shape[0] : int(position[0, 0]), int(Multipattern.shape[0] / 2) - int(singlepattern.shape[0] / 2) : int(Multipattern.shape[0] / 2) - int(singlepattern.shape[0] / 2) + singlepattern.shape[0] ] = singlepattern * e
-            # print out the numerical value of the multipattern
-            print(Multipattern)
         return Multipattern, position
 
     if size_real[0] > 500:
